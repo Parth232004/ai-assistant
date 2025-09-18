@@ -1,3 +1,31 @@
+# OS files
 .DS_Store
-.db
-.sqlite*
+Thumbs.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDEs/editors
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Databases
+*.db
+*.sqlite*
+*.sqlite3
+
+# Environment files
+.env
+*.env
+.streamlit/secrets.toml
