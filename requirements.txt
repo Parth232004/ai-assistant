@@ -1,0 +1,3 @@
+# Minimal dependencies for Streamlit Community Cloud
+# Keep this lean to ensure fast, reliable deploys
+streamlit>=1.28.0
