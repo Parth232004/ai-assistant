@@ -1,0 +1,183 @@
+{
+  "pipeline": {
+    "enabled": true,
+    "name": "AI Assistant Pipeline",
+    "version": "1.0.0",
+    "description": "Full sequence routing: Seeya → Sankalp → Noopur → Chandresh"
+  },
+  "sequence": {
+    "steps": [
+      {
+        "name": "summarize",
+        "component": "seeya",
+        "enabled": true,
+        "endpoint": "/api/summarize",
+        "description": "Message summarization and intent analysis",
+        "timeout": 30,
+        "retry_count": 3,
+        "required_fields": ["user_id", "platform", "message_text", "timestamp"],
+        "output_fields": ["summary_id", "summary", "intent", "urgency", "type"]
+      },
+      {
+        "name": "process_summary",
+        "component": "sankalp",
+        "enabled": true,
+        "endpoint": "/api/process_summary",
+        "description": "Task creation from summary",
+        "timeout": 25,
+        "retry_count": 3,
+        "required_fields": ["summary_id", "summary", "intent", "urgency", "user_id"],
+        "output_fields": ["task_id", "task_summary", "priority", "status"]
+      },
+      {
+        "name": "respond",
+        "component": "noopur",
+        "enabled": true,
+        "endpoint": "/api/respond",
+        "description": "Response generation",
+        "timeout": 20,
+        "retry_count": 2,
+        "required_fields": ["task_id", "user_id"],
+        "output_fields": ["response_id", "response_text", "tone", "status"]
+      },
+      {
+        "name": "search_similar",
+        "component": "chandresh",
+        "enabled": true,
+        "endpoint": "/api/search_similar",
+        "description": "Context retrieval and embedding search",
+        "timeout": 15,
+        "retry_count": 2,
+        "required_fields": ["message_text"],
+        "output_fields": ["related", "query_type", "total_found"]
+      },
+      {
+        "name": "coach_feedback",
+        "component": "parth",
+        "enabled": true,
+        "endpoint": "/api/coach_feedback",
+        "description": "Feedback collection and scoring",
+        "timeout": 10,
+        "retry_count": 2,
+        "required_fields": ["summary_id", "task_id", "response_id"],
+        "output_fields": ["feedback_id", "score", "stored"]
+      },
+      {
+        "name": "metrics",
+        "component": "nilesh",
+        "enabled": true,
+        "endpoint": "/api/metrics",
+        "description": "Performance and analytics tracking",
+        "timeout": 10,
+        "retry_count": 1,
+        "required_fields": [],
+        "output_fields": ["total_calls", "avg_latency_ms", "error_rate"]
+      }
+    ]
+  },
+  "routing": {
+    "default_flow": ["summarize", "process_summary", "respond"],
+    "parallel_steps": ["search_similar", "metrics"],
+    "optional_steps": ["coach_feedback"],
+    "bypass_modes": {
+      "quick_mode": ["summarize", "respond"],
+      "analysis_mode": ["summarize", "search_similar", "metrics"],
+      "full_pipeline": ["summarize", "process_summary", "respond", "search_similar", "coach_feedback", "metrics"]
+    }
+  },
+  "components": {
+    "seeya": {
+      "name": "SmartBrief Summarizer",
+      "base_url": "http://127.0.0.1:8000",
+      "health_endpoint": "/health",
+      "enabled": true,
+      "priority": 1
+    },
+    "sankalp": {
+      "name": "Cognitive Agent Task Processor",
+      "base_url": "http://127.0.0.1:8000",
+      "health_endpoint": "/health",
+      "enabled": true,
+      "priority": 2
+    },
+    "noopur": {
+      "name": "Response Agent",
+      "base_url": "http://127.0.0.1:8000",
+      "health_endpoint": "/health",
+      "enabled": true,
+      "priority": 3
+    },
+    "chandresh": {
+      "name": "Embedding & Context Service",
+      "base_url": "http://127.0.0.1:8000",
+      "health_endpoint": "/health",
+      "enabled": true,
+      "priority": 4
+    },
+    "parth": {
+      "name": "Coach Feedback System",
+      "base_url": "http://127.0.0.1:8000",
+      "health_endpoint": "/health",
+      "enabled": true,
+      "priority": 5
+    },
+    "nilesh": {
+      "name": "Metrics & Analytics Service",
+      "base_url": "http://127.0.0.1:8000",
+      "health_endpoint": "/health",
+      "enabled": true,
+      "priority": 6
+    }
+  },
+  "logging": {
+    "enabled": true,
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "logs/pipeline.log",
+    "max_size_mb": 100,
+    "backup_count": 5,
+    "console_output": true
+  },
+  "error_handling": {
+    "enabled": true,
+    "retry_delays": [1, 2, 4],
+    "circuit_breaker": {
+      "enabled": true,
+      "failure_threshold": 5,
+      "recovery_timeout": 60
+    },
+    "fallback_responses": {
+      "summarize": {
+        "summary": "Unable to process message at this time",
+        "intent": "info",
+        "urgency": "low",
+        "type": "system_message"
+      },
+      "respond": {
+        "response_text": "I apologize, but I'm unable to process your request right now. Please try again later.",
+        "tone": "apologetic",
+        "status": "fallback"
+      }
+    }
+  },
+  "performance": {
+    "cache_enabled": true,
+    "cache_ttl": 300,
+    "rate_limiting": {
+      "enabled": false,
+      "requests_per_minute": 60
+    },
+    "async_processing": true,
+    "batch_size": 10
+  },
+  "ui_settings": {
+    "streamlit": {
+      "theme": "dark",
+      "layout": "wide",
+      "sidebar_state": "expanded"
+    },
+    "refresh_interval": 5,
+    "auto_scroll": true,
+    "max_log_lines": 1000
+  }
+}
